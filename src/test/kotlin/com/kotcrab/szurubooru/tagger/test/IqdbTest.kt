@@ -15,15 +15,15 @@ import java.util.*
 class IqdbTest {
     @Test
     fun testMatchingIqdbQuery() {
-        val file = IqdbTest::class.java.getResource("/caster.jpg").file;
-        val url = queryIqdb(File(file), EnumSet.of(IqdbServices.Danbooru));
-        assertEquals("//danbooru.donmai.us/posts/1384292", url);
+        val file = IqdbTest::class.java.getResource("/caster.jpg").file
+        val url = queryIqdb(File(file), EnumSet.of(IqdbServices.Danbooru))
+        assertEquals("//danbooru.donmai.us/posts/1384292", url)
     }
 
     @Test
     fun testNotMatchingIqdbQuery() {
-        val file = IqdbTest::class.java.getResource("/random.png").file;
-        val url = queryIqdb(File(file), EnumSet.of(IqdbServices.Danbooru));
-        assertNull(url);
+        val file = IqdbTest::class.java.getResource("/random.png").file
+        val url = queryIqdb(File(file), EnumSet.of(IqdbServices.Danbooru))
+        assertNull(url)
     }
 }
