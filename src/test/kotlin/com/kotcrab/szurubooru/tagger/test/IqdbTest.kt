@@ -17,7 +17,7 @@ class IqdbTest {
     fun testMatchingIqdbQuery() {
         val file = IqdbTest::class.java.getResource("/caster.jpg").file
         val url = queryIqdb(File(file), EnumSet.of(IqdbServices.Danbooru))
-        assertEquals("//danbooru.donmai.us/posts/1384292", url)
+        assertEquals("https://danbooru.donmai.us/posts/1384292", url)
     }
 
     @Test
