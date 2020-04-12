@@ -169,7 +169,7 @@ class Szurubooru(private val config: SzurubooruDto) {
         var version = json["version"].int
 
         fun isImage(): Boolean {
-            return json["type"].string == "image"
+            return json["type"].string == "image" || json["type"].string == "animation"
         }
     }
 
