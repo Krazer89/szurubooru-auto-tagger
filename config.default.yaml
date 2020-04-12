@@ -33,7 +33,7 @@ tags:
 #    - test # Tag test will be ignored
 #    - foo
 #  remapCategories:
-#    # Danbooru has 4 tags categories which can be remapped to any Szurubooru category.
+#    # Danbooru has 5 tags categories which can be remapped to any Szurubooru category.
 #    # Eg. category `general` will be remapped to 'default'.
 #    - from: general
 #      to: default
@@ -43,11 +43,13 @@ tags:
 #      to: hero
 #    - from: copyright
 #      to: series
+#    - from: meta
+#      to: extra
 
 
 szurubooru: # Szurubooru configuration
   apiPath: http://szurubooru.local/api/
-  dataPath: http://szurubooru.local/data/
+  dataPath: http://szurubooru.local/
   username: auto-tagger # Auto-tagger should have its own separate account, make sure it has high enough privileges.
   password: auto-tagger
 
