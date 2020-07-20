@@ -23,6 +23,7 @@ tags:
   obtainAliases: true
   obtainSuggestions: false # Enabling highly unrecommended, will create many unused tags with little gain
   obtainImplications: true
+  tagMapEnabled: true
   tagMapFile: tagMap.yaml # Path to file where tags mapping will be stored. Path is relative to config file path.
   tagEscaping:
     escapeCharacters: '/+' # All those characters in tags names will be replaced with 'escapeWith' string

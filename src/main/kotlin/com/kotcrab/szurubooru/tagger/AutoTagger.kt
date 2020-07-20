@@ -65,6 +65,7 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
         log("Reading tag map...")
         tagMap = readTagMap()
 
+
         log("Obtaining tags...")
         szuruTags = szurubooru.getTags()
         szuruTagCategories = szurubooru.getTagCategories()
@@ -78,7 +79,7 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
     @Suppress("UNCHECKED_CAST")
     fun readTagMap(): HashMap<String, String> {
         val tagMapFile = workingDir.child(config.tags.tagMapFile)
-        if (tagMapFile.exists()) {
+        if (tagMapFile.exists() && config.tags.tagMapEnabled) {
             val tagMap = YamlReader(FileReader(tagMapFile)).read(HashMap::class.java)
             tagMap ?: return HashMap()
             return tagMap as HashMap<String, String>
@@ -88,9 +89,11 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
     }
 
     fun saveTagMap() {
+        if (config.tags.tagMapEnabled) {
         val writer = YamlWriter(FileWriter(config.tags.tagMapFile))
         writer.write(tagMap)
         writer.close()
+        }
     }
 
     fun run(task: Task, taskArguments: List<String>?) {
@@ -108,6 +111,18 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
                     log("Page ${managedPosts.page}, page size ${it.size}")
                     runForPosts(it, false)
                 }
+            }
+
+            Task.FailedPosts -> {
+                val failedPosts = szurubooru.pagedPosts(config.errorTag).toList()
+                log("There are ${failedPosts.size} posts that needs to be tagged")
+                runForPosts(failedPosts, true)
+            }
+
+            Task.MissingPosts -> {
+                val missingPosts = szurubooru.pagedPosts(config.noMatchTag).toList()
+                log("There are ${missingPosts.size} posts that needs to be tagged")
+                runForPosts(missingPosts, true)
             }
 
             Task.Posts -> {
@@ -172,7 +187,7 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
                 val sourceDir = File(taskArguments.first())
                 log("Batch upload mode. Source ${sourceDir.absolutePath}")
                 if (sourceDir.exists() == false) throw IllegalStateException("Provided directory path does not exist")
-                val files = sourceDir.listFiles(FileFilter { arrayOf("jpg", "jpeg", "png", "bmp").contains(it.extension) })
+                val files = sourceDir.listFiles(FileFilter { arrayOf("jpg", "jpeg", "png", "bmp", "mp4", "gif", "webm", "webp", "swf").contains(it.extension) })
                 if (files.size == 0) {
                     log("Source directory is empty")
                     return
@@ -283,8 +298,13 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
 
     private fun updatePostTags(post: Szurubooru.Post, postsToBeNoted: ArrayList<PostSet>, createdTags: HashSet<TagSet>, newPostsOnly: Boolean) {
         if (post.isImage() == false) {
-            logErr("Post ${post.id} is not an image.")
-            replacePostTriggerTag(post, config.errorTag)
+            logErr("Post ${post.id} is not a supported format.")
+            replacePostTriggerTag(post, config.invalidTag)
+            return
+        }
+        if (post.tooLarge() == true) {
+            logErr("Post ${post.id} is too large")
+            replacePostTriggerTag(post, config.invalidTag)
             return
         }
 
@@ -426,7 +446,7 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
     }
 
     private fun replacePostTriggerTag(post: Szurubooru.Post, newTag: String) {
-        val newTagsList = post.tags.minus(config.triggerTag).plus(newTag)
+        val newTagsList = post.tags.minus(config.triggerTag).minus(config.errorTag).minus(config.invalidTag).plus(newTag)
         szurubooru.updatePostTags(post, *newTagsList.toTypedArray())
     }
 
@@ -498,6 +518,8 @@ class AutoTagger(private val config: ConfigDto, private val workingDir: File) {
     enum class Task(val description: String, val hasArgument: Boolean = false) {
         NewPosts("Updates new posts (having config.triggerTag)"),
         ExistingPosts("Updates already tagged posts (having config.managedTag)"),
+        FailedPosts("Updates failed (config.errorTag)"),
+        MissingPosts("Updates missing posts (config.noMatchTag)"),
         NewTags("Updates tags that weren't ever updated"),
         ExistingTags("Updates existing tags"),
         Posts("Updates specified posts, you must specify post ids: Posts <postId1> [postId2] [postId3] ...", true),

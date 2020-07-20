@@ -46,6 +46,7 @@ class TagsDto {
     var obtainAliases = true
     var obtainSuggestions = false
     var obtainImplications = true
+    var tagMapEnabled = false
     var tagMapFile = "tagMap.yaml"
     var tagEscaping: TagEscapingDto = TagEscapingDto()
     var ignoreTags: List<String> = ArrayList()
@@ -56,6 +57,7 @@ class ConfigDto {
     var triggerTag = "auto_tagme"
     var managedTag = "auto_tagged"
     var errorTag = "auto_tagger_error"
+    var invalidTag = "auto_tagger_invalid"
     var noMatchTag = "tagme"
     var batchUploadTag = "auto_tagme"
 

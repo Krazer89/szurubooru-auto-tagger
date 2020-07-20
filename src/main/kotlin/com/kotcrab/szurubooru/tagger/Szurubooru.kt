@@ -171,6 +171,10 @@ class Szurubooru(private val config: SzurubooruDto) {
         fun isImage(): Boolean {
             return json["type"].string == "image" || json["type"].string == "animation"
         }
+
+        fun tooLarge(): Boolean {
+            return json["fileSize"].int > 8192000
+        }
     }
 
     class Tag(val json: JsonElement) {
